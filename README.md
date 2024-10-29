@@ -32,5 +32,10 @@ This contains the main MCTS algorithm. The algorithm is divided into the main 4 
   The main plotting file.
 
   ### `validation_train.py`
-  This file is used to run many consecutive training runs of the `core.py` mcts algorithm. It saves the main information about these runs (the configurations found, as well as the time, fem simulations and results) into specific `.json` files which can then be loading in the `validation_test.py` file. The idea is to save many runs to get a statistically significant understanding of the parameters on the result. 
+  This file is used to run many consecutive training runs of the `core.py` mcts algorithm. It saves the main information about these runs (the configurations found, as well as the time, fem simulations and results) into specific `.json` files which can then be loading in the `validation_test.py` file. The idea is to save many runs to get a statistically significant understanding of the parameters on the result.
+
+### TO DO
+- fix truncation issue in validation_test and validation_plot
+- fix all the graphs
+- find a simpler way to create passive node configs.
   
