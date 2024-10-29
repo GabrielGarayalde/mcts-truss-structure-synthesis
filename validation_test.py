@@ -6,87 +6,153 @@ import numpy as np
 import scipy.stats as stats
 import json
 # from functions_MCTS_print       import histogram_plot
-from functions_mcts_truss_all   import percentage_optimal_states #, calculate_means_stds
+from functions   import percentage_optimal_states #, calculate_means_stds
+    from env_truss                  import env_truss
 
 
-" ------------  TRUSS -------------- "
-from env_truss                  import env_truss
+import os
+import logging
+from typing import Dict, Any, List
 
-example                 = "Ororbia_1"
-env                     = env_truss(example)
-attr_to_minimize        = 'maxDisplacement'
+# ------------   SETUP LOGGING  -------------- 
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
 
+def load_results(
+    example: str,
+    attr_to_minimize: str,
+    alpha: float,
+    beta: float,
+    total_sims: int,
+    num_eps: int,
+    output_dir: str = "validation"
+) -> Dict[str, Any]:
+    """
+    Load simulation results from a single JSON file.
 
-def calculate_means_stds(sublists):
-    means = np.mean(sublists, axis=0)
-    stds = np.std(sublists, axis=0)
-    return means, stds
-" ---------  MCTS EXHAUSTIVE ----------- "
+    Args:
+        example (str): The example name (e.g., 'bridge').
+        attr_to_minimize (str): The attribute being minimized.
+        alpha (float): Alpha parameter.
+        beta (float): Beta parameter.
+        total_sims (int): Number of simulations.
+        num_eps (int): Number of episodes per simulation.
+        output_dir (str, optional): Base directory where results are saved. Defaults to "validation".
 
-results_exhaustive_terminal = np.load(f"validation/{example}/{example}_exhaustive_terminal.npy")
-min_value = min(results_exhaustive_terminal)
+    Returns:
+        Dict[str, Any]: Loaded simulation results.
+    """
+    # Define file name
+    json_file_name = f"{example}_results_{attr_to_minimize}_{alpha}_{beta}_{total_sims}_{num_eps}.json"
 
-exhaustive_terminal_min_nodes_path          = f"validation/{example}/{example}_exhaustive_terminal_min_nodes"
+    # Define full path
+    json_save_path = os.path.join(output_dir, example, json_file_name)
 
-with open(f'{exhaustive_terminal_min_nodes_path}.json', 'r') as json_file:
-    min_node_exhaustive = json.load(json_file)
-
-# Find the min value of maxDisplacement
-min_value_exhaust = min_node_exhaustive[-1]['attribute_value']
-min_state_exhaust = min_node_exhaustive[-1]['state']
-
-# min_value_exhaust = 7.147
-
-
-# print(f"Min maxDisplacement value: {min_value_exhaust}")
-# print(f"State associated with min maxDisplacement: {min_state_exhaust}")
-# env.render0(min_state_exhaust, "Global Minimum configuration")
-# env.render0_black(min_state_exhaust, r'$s_{3}$')
-
-
-" ---------  MCTS VALIDATION RUNS ----------- "
-
-
-# alpha_values            = [0.5]
-# alpha_values            = [0.1, 0.2, 0.3, 0.4, 0.5]
-alpha_values            = [0.3]
-# beta_values             = [0.0, 1.0]
-beta_values             = [0.0]
-
-total_simulations       = 10
-episodes_length         = 1000
-
-min_nodes_list               = []
-elapsed_times           = []
-convergence_points           = []
-FEM_counter_list           = []
-
-
-for alpha in alpha_values:
-    for beta in beta_values:
-        min_path_name       = f"{example}_min_{attr_to_minimize}_{alpha}_{beta}_{total_simulations}_{episodes_length}"
-        time_path_name      = f"{example}_time_{attr_to_minimize}_{alpha}_{beta}_{total_simulations}_{episodes_length}"
-        convergence_path_name      = f"{example}_convergence_{attr_to_minimize}_{alpha}_{beta}_{total_simulations}_{episodes_length}"
-        FEM_path_name      = f"{example}_FEM_counter_{attr_to_minimize}_{alpha}_{beta}_{total_simulations}_{episodes_length}"
-        
-        with open(f'validation/{example}/{min_path_name}.json', 'r') as json_file:
-            min_data = json.load(json_file)
-        
-        with open(f'validation/{example}/{time_path_name}.json', 'r') as json_file:
-            time_data = json.load(json_file)
-        
-        with open(f'validation/{example}/{convergence_path_name}.json', 'r') as json_file:
-            convergence_data = json.load(json_file)
-        
-        with open(f'validation/{example}/{FEM_path_name}.json', 'r') as json_file:
-            FEM_data = json.load(json_file)
-            
-        min_nodes_list.append(min_data)
-        elapsed_times.append(time_data)
-        convergence_points.append(convergence_data)
-        FEM_counter_list.append(FEM_data)
+    try:
+        with open(json_save_path, 'r') as json_file:
+            data = json.load(json_file)
+        logger.info(f"Results loaded from {json_save_path}")
+        return data
+    except FileNotFoundError:
+        logger.error(f"File not found: {json_save_path}")
+        return {}
+    except json.JSONDecodeError as e:
+        logger.error(f"Error decoding JSON: {e}")
+        return {}
 
 
+
+def validation_test():
+    """
+    Perform validation tests by loading simulation results and analyzing them.
+    """
+    
+    example                 = "Ororbia_1"
+    env                     = env_truss(example)
+    attr_to_minimize        = 'maxDisplacement'
+    example = 'Ororbia_1'
+    attr_to_minimize = 'max_displacement'
+    alpha = 0.3
+    beta = 0.0
+    total_sims = 10
+    num_eps = 1000
+    
+    def calculate_means_stds(sublists):
+        means = np.mean(sublists, axis=0)
+        stds = np.std(sublists, axis=0)
+        return means, stds
+    " ---------  MCTS EXHAUSTIVE ----------- "
+    
+    results_exhaustive_terminal = np.load(f"validation/{example}/{example}_exhaustive_terminal.npy")
+    min_value = min(results_exhaustive_terminal)
+    
+    exhaustive_terminal_min_nodes_path          = f"validation/{example}/{example}_exhaustive_terminal_min_nodes"
+    
+    with open(f'{exhaustive_terminal_min_nodes_path}.json', 'r') as json_file:
+        min_node_exhaustive = json.load(json_file)
+    
+    # Find the min value of maxDisplacement
+    min_value_exhaust = min_node_exhaustive[-1]['attribute_value']
+    min_state_exhaust = min_node_exhaustive[-1]['state']
+    
+    # min_value_exhaust = 7.147
+    
+    
+    # print(f"Min maxDisplacement value: {min_value_exhaust}")
+    # print(f"State associated with min maxDisplacement: {min_state_exhaust}")
+    # env.render0(min_state_exhaust, "Global Minimum configuration")
+    # env.render0_black(min_state_exhaust, r'$s_{3}$')
+    
+    
+    
+
+    # Load results
+    results = load_results(
+        example=example,
+        attr_to_minimize=attr_to_minimize,
+        alpha=alpha,
+        beta=beta,
+        total_sims=total_sims,
+        num_eps=num_eps,
+        output_dir="validation"
+    )
+
+    if not results:
+        logger.error("No results to process.")
+        return
+
+    # Extract data
+    min_nodes = results.get("results", {}).get("min_nodes", [])
+    elapsed_times = results.get("results", {}).get("elapsed_times", [])
+    convergence_points = results.get("results", {}).get("min_result_episodes", [])
+    FEM_counters = results.get("results", {}).get("FEM_counters", [])
+
+    # Example: Print summary
+    print(f"Total Simulations: {len(min_nodes)}")
+    if elapsed_times:
+        avg_elapsed_time = sum(elapsed_times) / len(elapsed_times)
+        print(f"Average Elapsed Time: {avg_elapsed_time:.4f} seconds")
+    print(f"FEM Simulations per Run: {FEM_counters}")
+
+    # Example: Accessing min_nodes data
+    for idx, node in enumerate(min_nodes, start=1):
+        print(f"Simulation {idx}:")
+        print(f"  Max Displacement: {node['max_displacement']}")
+        print(f"  State: {node['state']}")
+        print()
+
+    # Further analysis can be done here
+    # For example, plotting, statistical analysis, etc.
+
+
+
+
+
+if __name__ == "__main__":
+    validation_test()
 
 
 

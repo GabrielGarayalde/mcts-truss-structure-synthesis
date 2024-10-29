@@ -2,7 +2,7 @@ import random
 import time
 from classes import Node
 from functions import is_game_over, calculate_reward
-
+import copy
 
 def mcts(env, initial_state, num_eps, alpha, attr_to_minimize, optimal_d, beta, select_strategy):
     results_episode = []
@@ -63,10 +63,11 @@ def mcts(env, initial_state, num_eps, alpha, attr_to_minimize, optimal_d, beta, 
         # print(reward)
         nodeResult = getattr(node, attr_to_minimize)
         if nodeResult < currentMin:
+            min_node = copy.deepcopy(node)
             currentMin = nodeResult
-            min_node = Node(env)
-            min_node.state = node.state
-            min_node.max_displacement = node.max_displacement
+            # min_node = Node(env)
+            # min_node.state = node.state
+            # min_node.max_displacement = node.max_displacement
 
         results_episode.append(reward)
         min_results_episode.append(currentMin)

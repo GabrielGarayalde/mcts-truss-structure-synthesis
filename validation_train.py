@@ -112,7 +112,7 @@ def save_results(
     output_dir: str = "validation"
 ) -> None:
     """
-    Save simulation results to JSON files.
+    Save simulation results to a single JSON file, including only node.state and node.max_displacement.
 
     Args:
         example (str): The example name (e.g., 'bridge').
@@ -128,41 +128,50 @@ def save_results(
     example_dir = os.path.join(output_dir, example)
     os.makedirs(example_dir, exist_ok=True)
 
-    # Define file names
-    min_path_name = f"{example}_min_{attr_to_minimize}_{alpha}_{beta}_{total_sims}_{num_eps}.json"
-    time_path_name = f"{example}_time_{attr_to_minimize}_{alpha}_{beta}_{total_sims}_{num_eps}.json"
-    min_result_path_name = f"{example}_min_result_{attr_to_minimize}_{alpha}_{beta}_{total_sims}_{num_eps}.json"
-    FEM_counter_path_name = f"{example}_FEM_counter_{attr_to_minimize}_{alpha}_{beta}_{total_sims}_{num_eps}.json"
+    # Define file name
+    json_file_name = f"{example}_results_{attr_to_minimize}_{alpha}_{beta}_{total_sims}_{num_eps}.json"
 
-    # Define full paths
-    min_save_path = os.path.join(example_dir, min_path_name)
-    time_save_path = os.path.join(example_dir, time_path_name)
-    min_result_save_path = os.path.join(example_dir, min_result_path_name)
-    FEM_counter_save_path = os.path.join(example_dir, FEM_counter_path_name)
+    # Define full path
+    json_save_path = os.path.join(example_dir, json_file_name)
+
+    # Process min_nodes to extract only state and max_displacement
+    min_nodes_processed = [
+        {
+            "state": node.state.tolist(),
+            "max_displacement": node.max_displacement
+        }
+        for node in results.get("min_nodes", [])
+    ]
+
+    # Consolidate all results into a single dictionary
+    consolidated_results = {
+        "metadata": {
+            "example": example,
+            "attribute_to_minimize": attr_to_minimize,
+            "alpha": alpha,
+            "beta": beta,
+            "total_simulations": total_sims,
+            "episodes_per_simulation": num_eps,
+            "timestamp": time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+        },
+        "results": {
+            "min_nodes": min_nodes_processed,
+            "elapsed_times": results.get("elapsed_times", []),
+            "min_result_episodes": results.get("min_result_episodes", []),
+            "FEM_counters": results.get("FEM_counters", [])
+        }
+    }
 
     try:
-        # Save min nodes
-        with open(min_save_path, 'w') as json_file:
-            json.dump(results["min_nodes"], json_file, indent=4)
-        logger.info(f"Min nodes saved to {min_save_path}")
-
-        # Save elapsed times
-        with open(time_save_path, 'w') as json_file:
-            json.dump(results["elapsed_times"], json_file, indent=4)
-        logger.info(f"Elapsed times saved to {time_save_path}")
-
-        # Save min_result points
-        with open(min_result_save_path, 'w') as json_file:
-            json.dump(results["min_result_episodes"], json_file, indent=4)
-        logger.info(f"min_result points saved to {min_result_save_path}")
-
-        # Save FEM counters
-        with open(FEM_counter_save_path, 'w') as json_file:
-            json.dump(results["FEM_counters"], json_file, indent=4)
-        logger.info(f"FEM counters saved to {FEM_counter_save_path}")
+        # Save consolidated results to JSON file
+        with open(json_save_path, 'w') as json_file:
+            json.dump(consolidated_results, json_file, indent=4)
+        logger.info(f"All results saved to {json_save_path}")
 
     except Exception as e:
         logger.error(f"Error saving results: {e}")
+
+
 
 def main():
     """
