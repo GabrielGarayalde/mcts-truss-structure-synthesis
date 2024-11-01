@@ -51,4 +51,5 @@ This file runs an exhaustive search to find the global optimum configuration. It
 - fix truncation issue in validation_test and validation_plot
 - fix all the graphs
 - find a simpler way to create passive node configs.
+- requirements config
   
