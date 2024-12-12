@@ -4,7 +4,10 @@ The following code has been used in the paper: "MCTS: Mastering truss structure 
 ## Main Code 
 
 ### `main.py`
-Used when performing a single run-through of the MCTS algorithm. This calls upon the **core** module which contains the main body of the tree search algorithm. In the main file one can select the configuration (or case study) type from a set of configurations defined in the **configuration** module. These case studies are referenced in the paper.
+Used when performing a single run-through of the MCTS algorithm. This calls upon the `core.py` module which contains the main body of the tree search algorithm. In the main file one can select the configuration (or case study) type from a set of configurations defined in the `configuration.py` module. These case studies are referenced in the paper.
+
+### `main_cProfiler.py`
+Same as the `main.py` file except is uses cProfiler, a powerful python package that gives a detailed breakdown of the computational costs associated with each function call. Can sort by time taken etc. 
 
 ### `core.py`
 This contains the main MCTS algorithm. The algorithm is divided into the main 4 steps (selection, expansion, simulation, backpropogation) as per the literature. The inputs are:
@@ -40,7 +43,7 @@ This file is used to run many consecutive training runs of the `core.py` mcts al
 ### `validation_test.py`
 This file reads requested `.json` files created in the training phase. The user has the flexibility to choose which hyperparameters he wishes to compare and plot (e.g., compare alpha values, beta values, num of simulations etc.). In this file we call upon specific plotting functions from the `validation_plot.py` file. We also make a call for the global minimum state and value, which we pass as an argument to many of these plotting files. This is not available unless we have run an exhaustive search using `validation_exhaustive.py` which may not always be possible, depending on the size of the state space. In lieu of these values, the user can pass a 'placeholder' value to make the functions work.
   
-### `validation_plot.py`
+### `validation_plots.py`
 This file consists of all the plotting functions that are called in `validation_test.pt`.
 
 ### `validation_exhaustive.py`
@@ -48,8 +51,6 @@ This file runs an exhaustive search to find the global optimum configuration. It
 
   
 ### TO DO
-- fix truncation issue in validation_test and validation_plot
-- fix all the graphs
 - find a simpler way to create passive node configs.
 - requirements config
   
