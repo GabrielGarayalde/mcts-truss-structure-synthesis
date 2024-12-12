@@ -209,13 +209,13 @@ def main() -> None:
     env = EnvTruss(config)
     
     simulation_params = {
-        'num_eps': 50,
+        'num_eps': 150,
         'attr_to_minimize': "max_displacement",
-        'select_strategy': 'UCT-normal',
-        'total_sims': 2,
+        'select_strategy': 'UCT-mixmax',
+        'total_sims': 10,
         'optimal_d': 0.0,
-        'alpha_range': [0.1, 0.3, 0.5],
-        'beta_range': [0.0, 0.2, 0.4]
+        'alpha_range': [0.3, 0.5],
+        'beta_range': [0.0, 1.0]
     }
 
     for alpha in simulation_params['alpha_range']:

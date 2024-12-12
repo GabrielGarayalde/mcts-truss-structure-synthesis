@@ -165,6 +165,7 @@ def state_actions_list_create(env, node):
                 state_actions.append(action)
 
     return np.array(state_actions)
+    # return state_actions
 
 
 def line(node1_index, node2_index, nodes):

@@ -269,6 +269,35 @@ class Ororbia7Config(TrussConfig):
         self.construction_type = "static"
         self.max_element_length = None
 
+@dataclass
+class ArvanConfig(TrussConfig):
+    def __post_init__(self):
+        self.x, self.y = 20, 30
+        self.xm, self.yn = 4, 3
+        self.initial_state = [[0, 48], [6, 48]]
+        self.passive_nodes = []
+        self.max_volume = 350.0
+        self.optimal_displacement = 0.0420
+        self.optimal_strain_energy = 0.0
+        self.optimal_states = [
+            [
+                [0, 8],
+                [0, 17],
+                [0, 23],
+                [6, 17],
+                [8, 17],
+                [17, 23],
+                [17, 24],
+                [17, 48],
+                [23, 24],
+                [23, 48],
+                [24, 48],
+            ]
+        ]
+        self.max_states = 4
+        self.displacement_direction = "x_and_y"
+        self.construction_type = "static"
+        self.max_element_length = None
 
 # Collect configurations in a dictionary
 CONFIGURATIONS = {

@@ -9,25 +9,25 @@ from plot import plot_rewards, plot_min_results
 def main():
 
     # PARAMETERS
-    config_name = 'Ororbia_1'  # Choose the configuration you want to use
+    config_name = 'Ororbia_2'  # Choose the configuration you want to use
     config = CONFIGURATIONS[config_name]
     env = EnvTruss(config)
     # renderer = Renderer(env)
     
     start_time = time.time()
     
-    num_eps = 100
+    num_eps = 1000
     alpha = 0.5
     attr_to_minimize = "max_displacement"  # 'strain_energy' or 'max_displacement'
     optimal_d = 0
-    beta = 0.0  # This is only relevant in the 'mix-max' selection strategy
+    beta = 1.0  # This is only relevant in the 'mix-max' selection strategy
     
     """ SELECTION STRATEGY
     'UCT-normal'        - This is the basic strategy UCB for Trees
     'UCT-mixmax'        - Weights the max result found with 'beta' - [Jacobson 2014]
     'UCT-gabriel'       - Includes max term and standard deviation
     """
-    select_strategy = 'UCT-normal'  # Choose your selection strategy
+    select_strategy = 'UCT-mixmax'  # Choose your selection strategy
     
     # Run the MCTS algorithm
     root_node, min_node, results_episode, min_results_episode, fem_counter = mcts(

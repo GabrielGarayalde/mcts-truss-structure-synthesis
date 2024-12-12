@@ -133,12 +133,33 @@ class Node:
             env: The environment.
         """
         for child in self.children:
-            if child.allowed is None:
-                new_state, allowed = move_check(env, child)
-                child.state = np.array(new_state)
-                child.allowed = allowed
-                child.populate_node(env)
+            self.populate_child(env, child)
 
+                
+    def populate_child(self, env, child):
+        if child.allowed is None:
+            new_state, allowed = move_check(env, child)
+            child.state = np.array(new_state)
+            child.allowed = allowed
+            child.populate_node(env)
+
+    def expand_one_child(self, env):
+        """
+        Expands the node by generating and populating a single child node.
+        Returns the newly expanded child node, or None if no children can be expanded.
+        """
+        # Generate children if not already generated
+        if not self.children:
+            self.generate_children(env)
+        
+        # Find the first child that has not been populated yet
+        for child in self.children:
+            if child.allowed is None:
+                self.populate_child(env, child)
+                if child.allowed:
+                    return child
+        return None  # All children have been expanded
+    
     def select_child(self, alpha, beta, iterations, i, select_strategy):
         """
         Selects a child node based on the specified selection strategy.

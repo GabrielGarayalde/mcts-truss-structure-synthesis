@@ -153,8 +153,8 @@ def validation_test() -> None:
     test_params = {
         'attr_to_minimize': 'max_displacement',
         'beta': 0.0,
-        'total_sims': 2,
-        'num_eps': 50,
+        'total_sims': 10,
+        'num_eps': 1000,
         'alpha_values': [0.3]  # Add more alpha values if needed
     }
     

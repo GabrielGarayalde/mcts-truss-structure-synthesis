@@ -19,7 +19,9 @@ from rendering import Renderer  # Import Renderer class
 class EnvTruss:
     time_counter = 0
     fem_counter = 0
+    # Initialize FEM counters
 
+    
     def __init__(self, config):
         self.config = config
         # MATERIAL ATTRIBUTES #

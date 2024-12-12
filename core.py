@@ -33,38 +33,57 @@ def mcts(env, initial_state, num_eps, alpha, attr_to_minimize, optimal_d, beta, 
             node = node.select_child(alpha, beta, num_eps, episode, select_strategy)
         selection_time += time.time() - start_selection
 
+        
         # --- EXPANSION ---
         start_expansion = time.time()
         if not is_game_over(env, node):
-            if not node.children:
-                node.generate_children(env)
-                node.populate_children(env)
+            # Instead of generating and populating all children, expand one child
+            new_child = node.expand_one_child(env)
+            if new_child:
+                node = new_child  # Move to the newly expanded child
         expansion_time += time.time() - start_expansion
+
 
         # --- SIMULATION ---
         start_simulation = time.time()
         while not is_game_over(env, node):
             if not node.children:
                 node.generate_children(env)
-                node.populate_children(env)
-            selected_child = random.choice(node.children)
-            
-            if selected_child.allowed:
-                node = selected_child
-                # env.render(node)
+                # We do NOT populate all children here anymore.
+        
+            # Try to find an allowed child. Some may not be populated yet.
+            candidates = [c for c in node.children if c.allowed is not False]  # either allowed=True or None
+            random.shuffle(candidates)  # random order
+        
+            selected_child = None
+            for c in candidates:
+                if c.allowed is None:
+                    # Populate this single child on demand
+                    node.populate_child(env, c)
+                if c.allowed:
+                    selected_child = c
+                    break
+        
+            # If we found no allowed child, then it's terminal or stuck
+            if selected_child is None:
+                break
+        
+            node = selected_child
+        
         simulation_time += time.time() - start_simulation
 
-        # if iteration % 50 == 0:
-        #     print(iteration)
+
+        if episode % 50 == 0:
+            print(episode)
         #     env.render_node(node)
         #     print("max displacement", node.max_displacement)
         # Calculate reward
         reward = calculate_reward(env, node, optimal_d)
         # print(reward)
-        nodeResult = getattr(node, attr_to_minimize)
-        if nodeResult < currentMin:
+        mode_result = getattr(node, attr_to_minimize)
+        if mode_result < currentMin:
             min_node = copy.deepcopy(node)
-            currentMin = nodeResult
+            currentMin = mode_result
             # min_node = Node(env)
             # min_node.state = node.state
             # min_node.max_displacement = node.max_displacement
